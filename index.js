@@ -46,7 +46,7 @@ function histoMaker(column,ndx,domain,div,color){
 	var titleDiv = d3.select(div).append('div').html(themeDisplayTextShort[column]).style('padding',"10px")
 		.attr('id',column+"_title")
 	.style('height',"36px")
-	 titleDiv.append('div').attr("id",column+"_filter")
+	 titleDiv.append('div').attr("id",column+"_filter").attr("class","filter")
 	.style('height',"12px")
 
 	titleDiv.append("div")
@@ -73,7 +73,7 @@ function histoMaker(column,ndx,domain,div,color){
 	var gro = dim.group()
 	console.log(gro.reduceCount())
 	//console.log(dim)
-	histochart.width((window.innerWidth/2)-100)
+	histochart.width((window.innerWidth-100)/4)
 	        .height(100)
 	        .margins({top: 0, right: 50, bottom: 20, left: 40})
 	        .ordinalColors([color])
@@ -228,9 +228,9 @@ function ready(error, data){
 //         return d.month;
 //     });
 //
-//     var dateDimension = ndx.dimension(function (d) {
-//         return d.dd;
-//     });
+     var dateDimension = ndx.dimension(function (d) {
+         return d.STATE;
+     });
 //
 // 	var temp = ndx.dimension(function(d){
 // 		return d.tempMax
@@ -448,36 +448,32 @@ function ready(error, data){
 //     </div>
 //     */
 //
-  /*  dc.dataTable(".dc-data-table")
+    dc.dataTable(".dc-data-table")
          .dimension(dateDimension)
          // data table does not use crossfilter group but rather a closure
          // as a grouping function
          .group(function (d) {
-             var format = d3.format("02d");
-             return d.dd.getFullYear() + "/" + format((d.dd.getMonth() + 1));
+			 return d.STATE
          })
          .size(250) // (optional) max number of records to be shown, :default = 25
          // dynamic columns creation using an array of closures
          .columns([
              function (d) {
-                 return d.date;
+                 return d.FIPS;
              },
              function (d) {
-                 return d.agency;
+                 return d.LOCATION;
              },
              function (d) {
-                 return d.zipcode;
+                 return d["E_TOTPOP"];
              },
              function (d) {
-                 return toTitleCase(d.borough);
-             },
-             function (d) {
-                 return d.description;
+                 return d["AREA_SQMI"];
              }
          ])
          // (optional) sort using the given field, :default = function(d){return d;}
          .sortBy(function (d) {
-             return d.dd;
+             return d.FIPS;
          })
          // (optional) sort order, :default ascending
          .order(d3.ascending)
@@ -485,8 +481,7 @@ function ready(error, data){
          .renderlet(function (table) {
              table.selectAll(".dc-table-group").classed("info", true);
          });
-//
-// */
+
 // 	//nycMap
 // 	//var colorScale = d3.scale.linear().domain([0,10000]).range(["#eee", "#dc3a23"])
 // 	var maxZipcode = zipcodeGroup.top(1)[0].value
