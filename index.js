@@ -28,7 +28,7 @@ function toTitleCase(str)
 queue()
 .defer(d3.csv, "SVI2018_US.csv")
 //.defer(d3.csv, "nyc_smallSample.csv")
-//.defer(d3.json, "nyc-zip-codes.geojson")
+.defer(d3.json, "cartogram.geojson")
 .await(ready);
 
 //filters for text
@@ -71,9 +71,13 @@ function histoMaker(column,ndx,domain,div,color){
 		}
 	})
 	var gro = dim.group()
-	console.log(gro.reduceCount())
+	//console.log(gro.reduceCount())
 	//console.log(dim)
-	histochart.width((window.innerWidth-100)/4)
+	var width = (window.innerWidth-100)/4
+	if(column=="EP_PCI"){
+		width =600
+	}
+	histochart.width(width)
 	        .height(100)
 	        .margins({top: 0, right: 50, bottom: 20, left: 40})
 	        .ordinalColors([color])
@@ -176,7 +180,7 @@ var themeDisplayTextShort = {
     "EP_NOVEH":"% households with no vehicle available"
 
 }
-function ready(error, data){
+function ready(error, data, geodata){
 	// //format dates
 //     var dateFormat = d3.time.format("%m%d%Y");
 //     var numberFormat = d3.format(".2f");
@@ -482,28 +486,58 @@ function ready(error, data){
              table.selectAll(".dc-table-group").classed("info", true);
          });
 
-// 	//nycMap
-// 	//var colorScale = d3.scale.linear().domain([0,10000]).range(["#eee", "#dc3a23"])
-// 	var maxZipcode = zipcodeGroup.top(1)[0].value
-// 	var projection = d3.geo.mercator()
-// 					.center([-74.25,40.915])
-// 					.translate([0, 0])
-// 					.scale(45000);
-//     nycMap
-// 		.projection(projection)
-//         .width(480) // (optional) define chart width, :default = 200
-//         .height(430) // (optional) define chart height, :default = 200
-//         .transitionDuration(1000) // (optional) define chart transition duration, :default = 1000
-//         .dimension(zipcode) // set crossfilter dimension, dimension key should match the name retrieved in geo json layer
-//         .group(zipcodeGroup) // set crossfilter group
-//         //.colors(function(d, i){return  colorScale(d.value);})
-// 		//.colorAccessor(function(d){return d.value})
-// 		.colors(d3.scale.sqrt().domain([0,maxZipcode*.8]).range(["#ffffff", "#dc3a23"]))
-// 		.overlayGeoJson(geodata.features, "zipcode", function(d) {
-//             return d.properties.postalCode;
-//         })
-// 		//.on('mouseover', tip.show)
-// 		.legend(dc.legend().x(400).y(10).itemHeight(13).gap(5))
+ 	//nycMap
+ 	//var colorScale = d3.scale.linear().domain([0,10000]).range(["#eee", "#dc3a23"])
+ 	//var maxZipcode = zipcodeGroup.top(1)[0].value
+		 var padding = 10
+		 var width = 300
+		 var height = 200
+		 var projection = d3.geo.mercator()
+                 //   .fitExtent([[padding,padding],[width-padding,height-padding]],geodata)
+		 .scale(200).translate([500, 250]);
+		 
+ 					// .center([-74.25,40.915])
+//  					.translate([0, 0])
+//  					.scale(450);
+//
+	
+					 	var state = ndx.dimension(function(d){
+					 		return d["ST_ABBR"]
+					 	})
+					 	var stateGroup =state.group();
+var cartogram= dc.geoChoroplethChart("#cartogram");
+	
+	//var tip = d3.select("#cartogram").append('div').html("test")
+	
+	 cartogram
+ 		.projection(projection)
+         .width(width) // (optional) define chart width, :default = 200
+         .height(height) // (optional) define chart height, :default = 200
+         .transitionDuration(1000) // (optional) define chart transition duration, :default = 1000
+         .dimension(state) // set crossfilter dimension, dimension key should match the name retrieved in geo json layer
+         .group(stateGroup) // set crossfilter group
+         //.colors(function(d, i){return  colorScale(d.value);})
+ 		//.colorAccessor(function(d){return d.value})
+ 		.colors(["#aaa"])
+ 		.overlayGeoJson(geodata.features, "ST_ABBR", function(d) {
+             return d.properties["iso3166_2"];
+         })
+		 
+		 
+ 		d3.selectAll(".ST_ABBR")
+		 .style("cursor","pointer")
+		 .on('mouseover', function(d){
+			
+ 			d3.select(this).style("fill","black")
+			console.log(d)
+ 		})
+		.on('click',function(d){
+			console.log(d)
+		})
+ 		//.legend(dc.legend().x(400).y(10).itemHeight(13).gap(5))
+
+
+
      dc.renderAll();
 //	d3.select("#loader").remove();
 };
