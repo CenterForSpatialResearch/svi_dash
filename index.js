@@ -505,11 +505,10 @@ function ready(error, data, geodata){
 					 		return d["ST_ABBR"]
 					 	})
 					 	var stateGroup =state.group();
+
+
 var cartogram= dc.geoChoroplethChart("#cartogram");
-	
-	//var tip = d3.select("#cartogram").append('div').html("test")
-	
-	 cartogram
+	cartogram
  		.projection(projection)
          .width(width) // (optional) define chart width, :default = 200
          .height(height) // (optional) define chart height, :default = 200
@@ -522,23 +521,34 @@ var cartogram= dc.geoChoroplethChart("#cartogram");
  		.overlayGeoJson(geodata.features, "ST_ABBR", function(d) {
              return d.properties["iso3166_2"];
          })
+ 		.legend(dc.legend().x(200).y(10).itemHeight(13).gap(5))
 		 
 		 
- 		d3.selectAll(".ST_ABBR")
-		 .style("cursor","pointer")
-		 .on('mouseover', function(d){
-			
- 			d3.select(this).style("fill","black")
-			console.log(d)
- 		})
-		.on('click',function(d){
-			console.log(d)
-		})
- 		//.legend(dc.legend().x(400).y(10).itemHeight(13).gap(5))
+ 	
+ 
 
-
-
+		
+		
      dc.renderAll();
+	 
+	d3.selectAll(".ST_ABBR")
+	 .style("cursor","pointer")
+	 .on('mouseover', function(d){
+		d3.select(this).style("fill","black")
+	})
+	.on('click',function(d){
+		//console.log(d3.select(this).attr("class"))
+		d3.selectAll(".ST_ABBR").select("path").style("fill","#aaa")
+		d3.selectAll(".selected").select("path").style("fill","black")
+		
+		var selectedStates = ""
+		d3.selectAll(".selected").each(function(d){
+			selectedStates+=d.properties["google_name"].replace(" (United States)","")+" | "
+		})
+		d3.select("#filter_state").html(selectedStates)
+	})
+	
+	
 //	d3.select("#loader").remove();
 };
 
